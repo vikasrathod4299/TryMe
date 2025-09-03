@@ -1,7 +1,10 @@
-from app.main import run
 from app import logger
-import os
-
+from .nodes import workflow
+from pathlib import Path
 
 if __name__ == "__main__":
-    run()
+    initial_state = {
+        "person_img": "D:/TryMe/server/experiements/p4.jpg",
+        "garment_img": "D:/TryMe/server/experiements/g4.jpg",
+    }
+    result = workflow.invoke(initial_state)
