@@ -1,5 +1,6 @@
 from typing_extensions import Annotated
 from pydantic import BaseModel, EmailStr, Field, field_validator
+from app.user.serializer import UserProfile
 
 class UserRegistrationRequest(BaseModel):
     email: Annotated[EmailStr, Field(title="User email", description="The email of the user to register" ,pattern=r"^[\w\.-]+@[\w\.-]+\.\w{2,4}$")]
@@ -9,7 +10,8 @@ class UserRegistrationRequest(BaseModel):
 
     @field_validator('confirm_password')
     def check_passwords_match(cls, v, values):
-        if 'password' in values and v != values['password']:
+        print(values)
+        if 'password' in values.data and v != values.data['password']:
             raise ValueError("Passwords do not match")
         return v
 
@@ -20,6 +22,7 @@ class UserLoginRequest(BaseModel):
 
 class AuthResponse(BaseModel):
     """Response model for authentication endpoints."""
-    access_token: Annotated[str, Field(title="Access Token", description="JWT access token for authenticated user")]
-    token_type: Annotated[str, Field(title="Token Type", description="Type of the token, typically 'bearer'")]
-    message: Annotated[str, Field(title="Message", description="A message indicating the result of the authentication process")]
+    message:str
+    user:UserProfile
+    access_token: str
+    refresh_token: str

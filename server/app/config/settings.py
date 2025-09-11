@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings 
 
 class Settings(BaseSettings):
     # =============================================================================
@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     # =============================================================================
     # DATABASE CONFIGURATION (PostgreSQL)
     # =============================================================================
-    DATABASE_URL: str = "postgresql://postgres:rathod1234vikas@db:5432/fastapi_db"
-    POSTGRES_DB: str = "fastapi_db"
+    DATABASE_URL: str 
+    POSTGRES_DB: str = "try_me"
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "rathod1234vikas"
 
@@ -43,3 +43,5 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
+
+settings = Settings()
