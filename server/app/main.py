@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.auth.router import router as auth_router
+from app.config.router import api_router 
 from app.config.settings import settings
 
 app = FastAPI(
@@ -19,7 +19,7 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     )
 
-app.include_router(auth_router, prefix=settings.API_V1_STR, tags=["Authentication"])
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # Root endpoint
 @app.get("/")

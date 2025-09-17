@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     # =============================================================================
     # DATABASE CONFIGURATION (PostgreSQL)
     # =============================================================================
-    DATABASE_URL: str 
+    DATABASE_URL: str  = "postgresql://postgres:rathod1234vikas@localhost:5433/try_me"
     POSTGRES_DB: str = "try_me"
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "rathod1234vikas"
@@ -39,6 +39,15 @@ class Settings(BaseSettings):
     # CORS CONFIGURATION
     # =============================================================================
     BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000","http://localhost:8000","http://localhost:8080"]
+
+    # =============================================================================
+    # AWS S3 CONFIGURATION
+    # =============================================================================
+    AWS_ACCESS_KEY_ID: str = "your-aws-access-key-id"
+    AWS_SECRET_ACCESS_KEY: str = "your-aws-secret-access-key"
+    AWS_REGION: str = "your-aws-region"
+    S3_BUCKET_NAME: str = "your-s3-bucket-name"
+
 
     class Config:
         env_file = ".env"

@@ -26,3 +26,9 @@ class AuthResponse(BaseModel):
     user:UserProfile
     access_token: str
     refresh_token: str
+
+class LogoutPayload(BaseModel):
+    refresh_token: str
+
+class LogoutResponse(BaseModel):
+    message: str

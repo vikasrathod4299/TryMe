@@ -80,6 +80,7 @@ class AuthService:
         """Create both access and refresh tokens"""
         access_token = AuthService.create_access_token(user_data)
         refresh_token = AuthService.create_refresh_token(user_data)
+
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -123,6 +124,24 @@ class AuthService:
         db.commit()
         
         db.refresh(new_token)
+    
+    @staticmethod
+    def revoke_refresh_token_in_db(db, token: str, user_id: str) -> str:
+        """Revoke a refresh token in the database"""
+        refresh_token = db.query(RefreshToken).filter_by(token=token, user_id=user_id, revoked=False).first()
+
+        if refresh_token:
+            refresh_token.revoked = True
+            db.commit()
+            db.refresh(refresh_token)
+
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or already revoked refresh token"
+            )
+        return refresh_token
+
 
     @staticmethod
     def verify_refresh_token_in_db(db, token: str, user_id: str) -> RefreshToken:
@@ -142,5 +161,3 @@ class AuthService:
             )
 
         return refresh_token.token
-
-    
