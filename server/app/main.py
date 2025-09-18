@@ -1,11 +1,36 @@
-from app import logger
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.config.router import api_router 
+from app.config.settings import settings
 
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    version=settings.VERSION,
+    debug=settings.DEBUG,
+    openapi_url="/openapi.json"
+)
 
+if settings.BACKEND_CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.BACKEND_CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-def run():
-    logger.debug("Application started")
-    print("Hello from server!")
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
+# Root endpoint
+@app.get("/")
+def read_root():
+    return {
+        "message": f"Welcome to {settings.PROJECT_NAME}",
+        "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT
+    }
 
-if __name__ == "__main__":
-    run()
+# Health check
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
