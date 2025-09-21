@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str = "your-aws-secret-access-key"
     AWS_REGION: str = "your-aws-region"
     S3_BUCKET_NAME: str = "your-s3-bucket-name"
+    SQS_QUEUE_URL: str = "https://sqs.ap-south-1.amazonaws.com/your-account/outfit-checker-jobs"
 
 
     class Config:

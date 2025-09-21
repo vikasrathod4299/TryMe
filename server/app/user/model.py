@@ -16,6 +16,7 @@ class User(BaseModel):
 
     # Relationships
     refresh_tokens = relationship("RefreshToken", back_populates="user", cascade="all, delete-orphan")
+    user_uploads = relationship("UserUpload", back_populates="user", cascade="all, delete-orphan")
 
     
     def __repr__(self):
