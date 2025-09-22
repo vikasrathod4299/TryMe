@@ -29,7 +29,7 @@ class AuthController(BaseRepository[User]):
         user_dict['password'] = hashed_password
 
         user = self.create(user_dict)
-        tokens = AuthService.create_tokens({"sub": user.id})
+        tokens = AuthService.create_tokens({"sub": str(user.id)})
 
         AuthService.add_refresh_token_to_db(self.db, user.id, tokens['refresh_token'])
 

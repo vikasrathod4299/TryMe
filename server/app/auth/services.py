@@ -1,19 +1,21 @@
 
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any
-import jwt
 from jwt.exceptions import ExpiredSignatureError, PyJWTError
 from passlib.context import CryptContext
 from passlib.hash import bcrypt
 from fastapi import HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
-import random
-import string
+
 from fastapi import Depends
 from app.config.settings import settings
 from app.auth.enums import TokenType
 from app.auth.model import RefreshToken
+
+import jwt
+import random
+import string
 
 # Password hashing configuration
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -148,12 +150,10 @@ class AuthService:
         """Verify if the refresh token exists in the database"""
         refresh_token = db.query(RefreshToken).filter_by(token=token, user_id=user_id, revoked=False).first()
 
-        print("hereeee")
         if refresh_token:
             refresh_token.revoked = True
             db.commit()
             db.refresh(refresh_token)
-            print("not hereeee")
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
