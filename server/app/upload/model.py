@@ -17,7 +17,7 @@ class UserUpload(BaseModel):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     avatar_key = Column(String, nullable=False)
     outfit_key = Column(String, nullable=False)
-    generated_key = Column(String, nullable=True) 
+    result_key = Column(String, nullable=True) 
     status = Column(String, default=UploadStatus.PENDING.value)
 
     # Relationships

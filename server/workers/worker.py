@@ -1,7 +1,7 @@
 import ast
-import json
 import time
 from processor import process_job
+from app.upload.model import UserUpload
 from consumer import poll_messages, delete_message
 
 def run_worker():
@@ -23,6 +23,15 @@ def run_worker():
                 print(f"Processing job {job_id}...")
                 result_key = process_job(body)
                 print(f"Job {job_id} completed.")
+
+                # Update database record
+                upload_record = UserUpload.objects(job_id=job_id).first()
+                if upload_record:
+                    upload_record.result_key= result_key
+                    upload_record.status = 'completed'
+                    upload_record.save()
+
+                    print(f"Database updated for job {job_id}.")
 
             except Exception as e:
                 print(f"Error processing job {job_id}: {e}")
