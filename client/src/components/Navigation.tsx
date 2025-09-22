@@ -13,6 +13,9 @@ import {
 import { Home, Images, User, LogOut, Settings, Sparkles } from "lucide-react";
 import AuthDialog from "./AuthDialog";
 import { useAuth } from "@/hooks/use-auth";
+import { useMutation } from "@tanstack/react-query";
+import { logout } from "@/service/auth";
+import { toast } from "sonner";
 
 const Navigation = () => {
   const { user } = useAuth();
@@ -21,8 +24,25 @@ const Navigation = () => {
   const currentPath = location.pathname;
   const navigate = useNavigate()
 
+  const {mutate:signOutFn } = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      localStorage.removeItem("user");
+      window.location.href = "/";
+    },
+    onError: (error: any) => {
+      console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again.");
+    },
+  })
+
   const handleSignOut = () => {
-    // Sign out logic here
+    if(user?.refresh_token){
+      signOutFn({refresh_token: user?.refresh_token})
+    }else{
+      localStorage.removeItem("user");
+      window.location.href = "/";
+    }
   };
 
   const openAuthDialog = () => {

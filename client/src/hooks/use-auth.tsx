@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 // setUser will be used store it in local storage using useEffect and context api
 
 type User = {
+  access_token: string;
+  refresh_token: string;
   user: {
     id: string;
     full_name: string;

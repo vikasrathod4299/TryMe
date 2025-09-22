@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, EyeOff, Mail, Lock, User, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import { login } from "@/service/auth";
+import { login, register } from "@/service/auth";
 import { useAuth } from "@/hooks/use-auth";
 
 interface AuthDialogProps {
@@ -27,6 +27,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
   const { setUser } = useAuth()
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
   const { mutate: loginFn, isPending:loginPending } = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
@@ -38,6 +39,21 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       const err = error as any;
       console.log(err)
       toast.error(err?.response?.data?.detail || "Login failed");
+    },
+  });
+
+  const { mutate: registerFn, isPending:registerPending } = useMutation({
+    mutationFn: register,
+    onSuccess: (data) => {
+      console.log(data)
+      toast.success(`Welcome ${data.user?.full_name}!`);
+      setUser(data);
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      const err = error as any;
+      console.log(err)
+      toast.error(err?.response?.data?.message || "Login failed");
     },
   });
 
@@ -73,18 +89,13 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
       return;
     }
 
-    setIsLoading(true);
-    try {
-      // TODO: Implement actual registration
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      //onSignIn();
-      onOpenChange(false);
-      toast.success("Account created successfully! Welcome to AI TryOn.");
-    } catch (error) {
-      toast.error("Sign up failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    registerFn({
+      full_name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      confirm_password: formData.confirmPassword,
+    });
+
   };
 
   const handleSocialAuth = (provider: string) => {
@@ -246,8 +257,8 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating account..." : "Create Account"}
+              <Button type="submit" className="w-full" disabled={registerPending}>
+                {registerPending ? "Creating account..." : "Create Account"}
               </Button>
             </form>
           </TabsContent>
