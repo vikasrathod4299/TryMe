@@ -1,8 +1,8 @@
 import ast
 import time
-from processor import process_job
-from app.upload.model import UserUpload
-from consumer import poll_messages, delete_message
+from workers.processor import process_job
+from app.upload.model import UserUpload  
+from workers.consumer import poll_messages, delete_message
 
 def run_worker():
     print('Worker started, polling for messages...')

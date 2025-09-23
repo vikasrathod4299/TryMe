@@ -19,16 +19,11 @@ class UserLoginRequest(BaseModel):
     email: Annotated[EmailStr, Field(title="User email", description="The email of the user to login", pattern=r"^[\w\.-]+@[\w\.-]+\.\w{2,4}$")]
     password: Annotated[str, Field(title="User password", description="The password of the user to login", min_length=8)]
 
-
-class AuthResponse(BaseModel):
-    """Response model for authentication endpoints."""
-    message:str
-    user:UserProfile
-    access_token: str
-    refresh_token: str
-
 class LogoutPayload(BaseModel):
     refresh_token: str
 
-class LogoutResponse(BaseModel):
-    message: str
+
+class AuthResponse(BaseModel):
+    user:UserProfile
+    access_token: str
+    refresh_token: str

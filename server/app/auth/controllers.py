@@ -10,9 +10,9 @@ class AuthController(BaseRepository[User]):
     def __init__(self, db: Session):
         super().__init__(User, db)
 
-    async def register(self, user_data: UserRegistrationRequest):
+    async def register(self, user_data: UserRegistrationRequest) -> AuthResponse:
         user_dict = user_data.model_dump()
-        user_dict['is_verified'] = False
+        user_dict['is_verified'] = True 
 
         existing_user = self.find_one(email=user_dict['email'])
 
@@ -33,7 +33,7 @@ class AuthController(BaseRepository[User]):
 
         AuthService.add_refresh_token_to_db(self.db, user.id, tokens['refresh_token'])
 
-        user_profile =  UserProfile (
+        user_profile =  UserProfile(
             id=user.id,
             email=user.email,
             full_name=user.full_name,
@@ -45,10 +45,9 @@ class AuthController(BaseRepository[User]):
             user=user_profile,
             access_token=tokens['access_token'],
             refresh_token=tokens['refresh_token'],
-            message="Registration successful. Please verify your email to activate your account."
         )
 
-    def login(self, login_data: UserLoginRequest):
+    def login(self, login_data: UserLoginRequest) -> AuthResponse:
 
         user = self.find_one(email=login_data.email)
 
@@ -89,6 +88,10 @@ class AuthController(BaseRepository[User]):
 
     def logout(self, logout_data: LogoutPayload, user_id: str):
         """veryfy the refresh token and delete it from the database"""
-        AuthService.revoke_refresh_token_in_db(self.db, logout_data.refresh_token, user_id)
-
-        return {"message": "Logout successful."}
+        try:
+            AuthService.revoke_refresh_token_in_db(self.db, logout_data.refresh_token, user_id)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid refresh token"
+            ) from e
