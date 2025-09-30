@@ -32,7 +32,7 @@ const AuthDialog = ({ open, onOpenChange }: AuthDialogProps) => {
     mutationFn: login,
     onSuccess: (data) => {
       toast.success("Login successful!");
-      setUser(data);
+      setUser(data.data);
       onOpenChange(false);
     },
     onError: (error) => {
