@@ -1,7 +1,10 @@
 import ast
 import time
+from app.config.database import SessionLocal
 from workers.processor import process_job
-from app.upload.model import UserUpload  
+from app.upload.model import UserUpload as UserUploadModel
+from app.user.model import User  # Import User model to resolve relationship
+from app.auth.model import RefreshToken
 from workers.consumer import poll_messages, delete_message
 
 def run_worker():
@@ -25,13 +28,13 @@ def run_worker():
                 print(f"Job {job_id} completed.")
 
                 # Update database record
-                upload_record = UserUpload.objects(job_id=job_id).first()
-                if upload_record:
-                    upload_record.result_key= result_key
-                    upload_record.status = 'completed'
-                    upload_record.save()
-
-                    print(f"Database updated for job {job_id}.")
+                with SessionLocal() as db:
+                    upload_record = db.query(UserUploadModel).filter(UserUploadModel.id == job_id).first()
+                    if upload_record:
+                        upload_record.processed_key = result_key
+                        upload_record.status = 'completed'
+                        db.commit()
+                print(f"Database updated for job {job_id}.")
 
             except Exception as e:
                 print(f"Error processing job {job_id}: {e}")

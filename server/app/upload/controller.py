@@ -40,7 +40,7 @@ class UploadController:
         try:
             self.uploadService.verify_user_upload(avatar_key, outfit_key)
         except ValueError as e:
-            return {"error": str(e)}
+            return {"detail": str(e)}
 
 
         avatar_url = self.uploadService.get_view_url(avatar_key)
@@ -49,10 +49,10 @@ class UploadController:
         userUpload = self.uploadService.find_one(avatar_key=avatar_key, outfit_key=outfit_key, user_id=user_id)
 
         if not userUpload:
-            return {"error": "Upload record not found."}
+            raise ValueError("No matching upload record found.")
 
         if userUpload.status != UploadStatus.PENDING.value:
-            return {"error": f"Upload already processed with status {userUpload.status}."}
+            raise ValueError(f"Upload already processed with status {userUpload.status}.")
 
         job_data = {
             "job_id": str(userUpload.id),   

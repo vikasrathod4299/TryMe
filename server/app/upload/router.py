@@ -25,6 +25,9 @@ async def confirm_upload(avatar_key: str = Form(...), outfit_key: str = Form(...
     
     userUploadController = UploadController(db)
 
-    result = await userUploadController.confirm_upload(avatar_key, outfit_key, user.id)
+    try:
+        result = await userUploadController.confirm_upload(avatar_key, outfit_key, user.id)
+    except ValueError as e:
+        return {"detail": str(e)}
 
     return {"message": "Upload confirmed successfully.", "data": result}

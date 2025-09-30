@@ -4,9 +4,10 @@ from typing import TypeVar, Optional, Generic, List
 T = TypeVar('T')
 
 class ResponseModel(BaseModel, Generic[T]):
-    message: str
+    message: Optional[str] = None
     data: Optional[T] | List[T] | None = None
+    detail: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         
