@@ -98,14 +98,14 @@ const ImageUploadZone = ({
             />
           </div>
           <Button
-            variant="destructive"
+            variant="outline"
             size="icon"
-            className="absolute top-3 right-3 h-8 w-8 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-3 right-3 h-6 w-6 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10"
             onClick={removeFile}
           >
             <X className="h-4 w-4" />
           </Button>
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-xl" />
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-xl pointer-events-none" />
         </div>
       ) : (
         <div
@@ -144,7 +144,7 @@ const ImageUploadZone = ({
           </div>
         </div>
       )}
-      
+
       <input
         ref={fileInputRef}
         type="file"

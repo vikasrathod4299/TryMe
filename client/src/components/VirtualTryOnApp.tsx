@@ -6,12 +6,16 @@ import { toast } from "sonner";
 import ImageUploadZone from "./ImageUploadZone";
 import GeneratedImageDisplay from "./GeneratedImageDisplay";
 import Navigation from "./Navigation";
+import { useMutation } from "@tanstack/react-query";
+import { confirmUpload, generateUploadURL, uploadToS3 } from "@/service/upload";
 
 const VirtualTryOnApp = () => {
+  const [outfitUrl, setOutfitUrl ] = useState<string | null>(null);
+  const [userUrl, setUserUrl ] = useState<string | null>(null);
   const [outfitImage, setOutfitImage] = useState<File | null>(null);
   const [userImage, setUserImage] = useState<File | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState<'uploading' | 'generating' | null>(null);
 
   const handleOutfitUpload = useCallback((file: File) => {
     setOutfitImage(file);
@@ -23,29 +27,64 @@ const VirtualTryOnApp = () => {
     toast.success("Your photo uploaded successfully!");
   }, []);
 
+  const { mutate: confirmUploadFn} = useMutation({
+    mutationFn: confirmUpload,
+    onSuccess: (data) => {
+     const { avatar_url, outfit_url } =  data.data;
+     setUserUrl(avatar_url);
+     setOutfitUrl(outfit_url);
+     setLoadingStatus('generating');
+      toast.success("Images uploaded successfully! Generating virtual try-on...");
+      setLoadingStatus(null);
+    },
+    onError: (error) => {
+      console.error("Error confirming upload:", error);
+      toast.error("Failed to confirm upload. Please try again.");
+    }
+  });
+
+
+  const {mutate:generateUploadUrl} = useMutation({
+    mutationFn: generateUploadURL,
+    onSuccess: async (data) => {
+      try {
+        const { avatar, outfit } = data.data;
+        setLoadingStatus('uploading');
+        await uploadToS3({ upload_url: avatar.upload_url, file: userImage! });
+        await uploadToS3({ upload_url: outfit.upload_url, file: outfitImage! });
+        confirmUploadFn({ avatar_key: avatar.key, outfit_key: outfit.key });
+      } catch (error) {
+        console.error("Error uploading images:", error);
+        toast.error("Failed to upload images. Please try again.");
+      }
+    },
+    onError: (error) => {
+      console.error("Error generating upload URLs:", error);
+      toast.error("Failed to generate upload URLs. Please try again.");
+    }
+  });
+
+
+
   const generateTryOn = async () => {
     if (!outfitImage || !userImage) {
       toast.error("Please upload both images before generating");
       return;
     }
 
-    setIsGenerating(true);
     try {
-      // TODO: Integrate with Gemini Flash 2.5 API
-      // For now, simulate the generation process
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // This would be replaced with actual API call to Gemini Flash 2.5
+      generateUploadUrl({avatar_filename: userImage.name, outfit_filename: outfitImage.name});
+
       setGeneratedImage("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=600&fit=crop");
       toast.success("Virtual try-on generated successfully!");
     } catch (error) {
       toast.error("Failed to generate virtual try-on. Please try again.");
     } finally {
-      setIsGenerating(false);
+      setLoadingStatus(null);
     }
   };
 
-  const canGenerate = outfitImage && userImage && !isGenerating;
+  const canGenerate = outfitImage && userImage && !loadingStatus;
 
   return (
     <div className="min-h-screen bg-background">
@@ -113,7 +152,7 @@ const VirtualTryOnApp = () => {
             disabled={!canGenerate}
             className="text-lg px-12 py-4 h-auto"
           >
-            {isGenerating ? (
+            {loadingStatus === 'generating' ? (
               <>
                 <Wand2 className="h-6 w-6 animate-spin" />
                 Generating Magic...
@@ -124,14 +163,17 @@ const VirtualTryOnApp = () => {
                 Generate Virtual Try-On
               </>
             )}
+            {
+              loadingStatus === 'uploading' && <span className="ml-3">(Uploading Images...)</span>
+            }
           </Button>
         </div>
 
         {/* Result Section */}
-        {(generatedImage || isGenerating) && (
+        {(generatedImage || loadingStatus === 'generating') && (
           <GeneratedImageDisplay
             generatedImage={generatedImage}
-            isGenerating={isGenerating}
+            isGenerating={loadingStatus === 'generating'}
             onDownload={() => {
               if (generatedImage) {
                 const link = document.createElement("a");
