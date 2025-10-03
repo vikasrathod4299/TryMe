@@ -68,3 +68,26 @@ class UploadController:
             "avatar_url": avatar_url,
             "outfit_url": outfit_url
         }
+
+    async def get_upload_job_status(self, job_id: str, user_id: str) -> dict:
+        job = self.uploadService.get(job_id)
+
+        if not job:
+            return {"detail": "Job not found."}
+
+        if job.user_id != user_id:
+            return {"detail": "Not authorized to access this job."}
+
+        if job.status == UploadStatus.COMPLETED.value:
+            result_key = self.uploadService.get_view_url(job.result_key)
+            return {
+                "job_id": job.id,
+                "status": job.status,
+                "result_url": result_key
+            }
+
+        return {
+            "job_id": job.id,
+            "status": job.status
+        }
+    

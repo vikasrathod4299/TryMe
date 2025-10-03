@@ -31,3 +31,9 @@ async def confirm_upload(avatar_key: str = Form(...), outfit_key: str = Form(...
         return {"detail": str(e)}
 
     return {"message": "Upload confirmed successfully.", "data": result}
+
+@router.get('/job/{job_id}')
+async def get_upload_job_status(job_id: str, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    userUploadController = UploadController(db)
+    result = await userUploadController.get_upload_job_status(job_id, user.id)
+    return {"message": "Upload job status retrieved successfully.", "data": result}
