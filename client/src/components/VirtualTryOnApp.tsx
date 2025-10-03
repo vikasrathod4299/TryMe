@@ -7,7 +7,7 @@ import ImageUploadZone from "./ImageUploadZone";
 import GeneratedImageDisplay from "./GeneratedImageDisplay";
 import Navigation from "./Navigation";
 import { useMutation } from "@tanstack/react-query";
-import { confirmUpload, generateUploadURL, uploadToS3 } from "@/service/upload";
+import { confirmUpload, generateUploadURL, getJobStatus, uploadToS3 } from "@/service/upload";
 
 const VirtualTryOnApp = () => {
   const [outfitUrl, setOutfitUrl ] = useState<string | null>(null);
@@ -30,11 +30,12 @@ const VirtualTryOnApp = () => {
   const { mutate: confirmUploadFn} = useMutation({
     mutationFn: confirmUpload,
     onSuccess: (data) => {
-     const { avatar_url, outfit_url } =  data.data;
+     const { avatar_url, outfit_url, job_id } =  data.data;
      setUserUrl(avatar_url);
      setOutfitUrl(outfit_url);
      setLoadingStatus('generating');
       toast.success("Images uploaded successfully! Generating virtual try-on...");
+      pollJobStatus(job_id);
       setLoadingStatus(null);
     },
     onError: (error) => {
@@ -83,6 +84,26 @@ const VirtualTryOnApp = () => {
       setLoadingStatus(null);
     }
   };
+
+  async function pollJobStatus(jobId) {
+    let loading = true;
+    while (loading) {
+      const res = await getJobStatus(jobId);
+      const { data } = res;
+
+      if (data.status === "completed") {
+        loading = false;
+        //stopLoadingAnimation();
+        //showResultImage(data.result_url);
+      } else if (data.status === "failed") {
+        loading = false;
+        //showError("Job failed, please try again.");
+      } else {
+        await new Promise(r => setTimeout(r, 3000)); // wait 3s
+      }
+    }
+  }
+
 
   const canGenerate = outfitImage && userImage && !loadingStatus;
 

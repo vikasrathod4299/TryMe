@@ -11,6 +11,7 @@ class UploadResponse(BaseModel):
 class ConfirmUploadResponse(BaseModel):
     avatar_url: str
     outfit_url: str
+    job_id: str
 
     class Config:
         from_attributes = True

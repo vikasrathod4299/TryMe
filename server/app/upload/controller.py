@@ -65,6 +65,7 @@ class UploadController:
         self.uploadService.enqueue_processing_job(job_data)
         
         return {
+            "job_id": str(userUpload.id),
             "avatar_url": avatar_url,
             "outfit_url": outfit_url
         }

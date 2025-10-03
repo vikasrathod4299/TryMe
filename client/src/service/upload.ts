@@ -5,8 +5,7 @@ export const generateUploadURL = async({avatar_filename, outfit_filename}:{avata
         avatar_filename,
         outfit_filename
     });
-    return result.data;
-}
+    return result.data; }
 
 export const uploadToS3 = async({upload_url, file}:{upload_url: string, file: File}) => {
     const res = await fetch(upload_url, {
@@ -34,3 +33,8 @@ export const confirmUpload = async({avatar_key, outfit_key}:{avatar_key: string,
     });
     return result.data;
 }       
+
+export const getJobStatus = async(job_id: string): Promise<JobStatusResponse> => {
+    const result = await axiosClient.get(`/upload/job/${job_id}`);
+    return result.data;
+}
