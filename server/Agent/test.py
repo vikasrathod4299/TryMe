@@ -11,7 +11,3 @@ if __name__ == "__main__":
     }
     result = workflow.invoke(initial_state)
     logger.info(f"Workflow result: {result}")
-
-
-
-

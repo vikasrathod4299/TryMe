@@ -26,5 +26,6 @@ dependencies = [
     "pyjwt>=2.10.1",
     "boto3>=1.40.31",
     "python-multipart>=0.0.20",
+    "bcrypt>=5.0.0",
 ]
 

@@ -7,10 +7,11 @@ from app.config.BaseModel import BaseModel
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
+
 class BaseRepository(Generic[ModelType]):
     """Base repository providing common database operations"""
 
-    def __init__(self, model: Type[ModelType], db:Session):
+    def __init__(self, model: Type[ModelType], db: Session):
         self.model = model
         self.db = db
 
@@ -21,12 +22,13 @@ class BaseRepository(Generic[ModelType]):
     def get_all(self) -> List[ModelType]:
         """Retrieve all records"""
         return self.db.query(self.model).all()
-    
+
     def find_one(self, **filters) -> Optional[ModelType]:
         query = self.db.query(self.model)
         for key, value in filters.items():
-            if hasattr(self.model, key):
-                query = query.filter(getattr(self.model, key) == value)
+            if not hasattr(self.model, key):
+                raise AttributeError(f"{self.model.__name__} has no column '{key}'")
+            query = query.filter(getattr(self.model, key) == value)
             return query.first()
 
     def create(self, obj_in: Dict[str, Any]) -> ModelType:
@@ -39,10 +41,15 @@ class BaseRepository(Generic[ModelType]):
             return db_obj
         except IntegrityError as e:
             self.db.rollback()
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e.orig))
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e.orig)
+            )
         except SQLAlchemyError as e:
             self.db.rollback()
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error",
+            )
 
     def update(self, db_obj: ModelType, obj_in: Dict[str, Any]) -> ModelType:
         """Update an existing record"""
@@ -55,20 +62,31 @@ class BaseRepository(Generic[ModelType]):
             return db_obj
         except IntegrityError as e:
             self.db.rollback()
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e.orig))
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e.orig)
+            )
         except SQLAlchemyError as e:
             self.db.rollback()
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error",
+            )
 
     def delete(self, id: Union[int, str]) -> ModelType:
         """Delete a record by its ID"""
         try:
             obj = self.db.query(self.model).get(id)
             if not obj:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found")
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Record not found"
+                )
             self.db.delete(obj)
             self.db.commit()
             return obj
         except SQLAlchemyError as e:
             self.db.rollback()
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database error")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Database error",
+            )
+

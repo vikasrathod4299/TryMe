@@ -49,6 +49,8 @@ class Settings(BaseSettings):
     S3_BUCKET_NAME: str = "your-s3-bucket-name"
     SQS_QUEUE_URL: str = "https://sqs.ap-south-1.amazonaws.com/your-account/outfit-checker-jobs"
 
+    OPENAI_API_KEY: str = "your-openai-api-key"
+    GEMINI_API_KEY: str = "your-gemini-api-key"
 
     class Config:
         env_file = ".env"

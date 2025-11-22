@@ -1,3 +1,4 @@
+import os
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from urllib.parse import urlparse
@@ -14,7 +15,7 @@ from app import logger
 from pathlib import Path
 
 openai_llm = ChatOpenAI(model_name="gpt-4o", temperature=0)
-genai_client= genai.Client()
+genai_client= genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
 gemini_config = types.GenerateContentConfig(
     temperature=1,
     top_p=0.95,
