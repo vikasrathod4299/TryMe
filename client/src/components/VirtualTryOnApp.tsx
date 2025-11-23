@@ -76,7 +76,6 @@ const VirtualTryOnApp = () => {
     try {
       generateUploadUrl({avatar_filename: userImage.name, outfit_filename: outfitImage.name});
 
-      setGeneratedImage("https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=600&fit=crop");
       toast.success("Virtual try-on generated successfully!");
     } catch (error) {
       toast.error("Failed to generate virtual try-on. Please try again.");
@@ -93,8 +92,7 @@ const VirtualTryOnApp = () => {
 
       if (data.status === "completed") {
         loading = false;
-        //stopLoadingAnimation();
-        //showResultImage(data.result_url);
+        setGeneratedImage(data.result_url);
       } else if (data.status === "failed") {
         loading = false;
         //showError("Job failed, please try again.");

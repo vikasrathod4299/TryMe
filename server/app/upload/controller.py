@@ -12,20 +12,28 @@ class UploadController:
     async def generate_upload_urls(
         self, req: UploadRequest, user_id: str
     ) -> UploadResponse:
-        avatar_key = self.uploadService.generate_s3_key(
-            user_id, "avatars", req.avatar_filename
-        )
-        outfit_key = self.uploadService.generate_s3_key(
-            user_id, "outfits", req.outfit_filename
-        )
-
-        self.uploadService.add_user_upload(
+        user_upload = self.uploadService.add_user_upload(
             UserUpload(
                 user_id=user_id,
-                avatar_key=avatar_key,
-                outfit_key=outfit_key,
                 status=UploadStatus.PENDING.value,
             )
+        )
+
+
+        job_id = user_upload.id
+
+        if not job_id:
+            raise ValueError("Failed to create upload job.")
+
+        avatar_key = self.uploadService.generate_s3_key(
+            user_id, "avatars", req.avatar_filename, job_id
+        )
+        outfit_key = self.uploadService.generate_s3_key(
+            user_id, "outfits", req.outfit_filename, job_id
+        )
+
+        self.uploadService.update(
+            user_upload, {"avatar_key": avatar_key, "outfit_key": outfit_key}
         )
 
         return UploadResponse(
@@ -61,9 +69,6 @@ class UploadController:
         if not userUpload:
             raise ValueError("No matching upload record found.")
 
-        print("👉 TYPE:", type(userUpload.status))
-        print("👉 VALUE:", userUpload.status)
-
         if userUpload.status != UploadStatus.PENDING.value:
             raise ValueError(
                 f"Upload already processed with status {userUpload.status}."
@@ -71,6 +76,7 @@ class UploadController:
 
         job_data = {
             "job_id": str(userUpload.id),
+            "user_id": str(user_id),
             "avatar_key": avatar_key,
             "outfit_key": outfit_key,
         }

@@ -1,4 +1,4 @@
-import ast
+import json
 import time
 from app.config.database import SessionLocal
 from workers.processor import process_job
@@ -19,29 +19,24 @@ def run_worker():
             continue
 
         for msg in messages:
-            body = ast.literal_eval(msg['Body'])
-            job_id = body.get('job_id')
-
             try:
+                # Parse JSON message body
+                body = json.loads(msg['Body'])
+                job_id = body.get('job_id')
+
                 print(f"Processing job {job_id}...")
                 result_key = process_job(body)
                 print(f"Job {job_id} completed.")
 
-                # Update database record
-                with SessionLocal() as db:
-                    upload_record = db.query(UserUploadModel).filter(UserUploadModel.id == job_id).first()
-                    if upload_record:
-                        upload_record.processed_key = result_key
-                        upload_record.status = 'completed'
-                        db.commit()
-                print(f"Database updated for job {job_id}.")
-
+            except json.JSONDecodeError as e:
+                print(f"Error parsing message JSON: {e}")
+                print(f"Message body: {msg['Body']}")
             except Exception as e:
-                print(f"Error processing job {job_id}: {e}")
+                print(f"Error processing job: {e}")
             finally:    
                 # Delete message from queue after processing
                 delete_message(msg['ReceiptHandle'])
-                print(f"Job {job_id} message deleted from queue.")
+                print(f"Message deleted from queue.")
 
 if __name__ == "__main__":
     run_worker()

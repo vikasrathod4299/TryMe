@@ -23,6 +23,7 @@ def process_job(jon_data):
     avatar_key = jon_data['avatar_key']
     outfit_key = jon_data['outfit_key']
     job_id = jon_data['job_id']
+    user_id = jon_data['user_id']
 
     print(f"Processing job {job_id} with avatar {avatar_key} and outfit {outfit_key}")
 
@@ -40,62 +41,65 @@ def process_job(jon_data):
     print(f"Downloaded files for job {job_id}")
 
     try:
-        # Prepare state for Agent workflow
-        agent_state: AgentState = {
-            "person_img": str(avatar_file),
-            "garment_img": str(outfit_file),
-            "garment_description": "",
-            "generated_image": "",
-            "is_outfit_worn": False
-        }
+        # --------------------------------------------
+        # 🚫 REAL GENERATION DISABLED (Dev Mode)
+        # --------------------------------------------
+        # agent_state: AgentState = {
+        #     "person_img": str(avatar_file),
+        #     "garment_img": str(outfit_file),
+        #     "garment_description": "",
+        #     "generated_image": "",
+        #     "is_outfit_worn": False
+        # }
 
-        print(f"Running Agent workflow for job {job_id}...")
-        result_state = try_on_me(agent_state)
-        
-        generated_image_name = result_state.get("generated_image")
-        print(f"Agent generated image: {generated_image_name}")
+        # print(f"Running Agent workflow for job {job_id}...")
+        # result_state = try_on_me(agent_state)
+        # generated_image_name = result_state.get("generated_image")
+        # --------------------------------------------
 
-        # Upload the generated image to S3
-        generated_images_dir = Path("generated_images")
-        if generated_images_dir.exists():
-            generated_file = generated_images_dir / generated_image_name
-            if generated_file.exists():
-                result_key = f"processed/{job_id}/{generated_image_name}"
-                s3.upload_file(str(generated_file), BUCKET_NAME, result_key)
-                print(f"Uploaded processed file to {result_key} for job {job_id}")
-                
-                # Update database with result_key and status
-                with SessionLocal() as db:
-                    upload_record = db.query(UserUpload).filter(UserUpload.id == job_id).first()
-                    if upload_record:
-                        upload_record.result_key = result_key
-                        upload_record.status = UploadStatus.COMPLETED.value
-                        db.commit()
-                        db.refresh(upload_record)
-                        print(f"Database updated for job {job_id} - Status: {upload_record.status}, Result Key: {upload_record.result_key}")
-                    else:
-                        logger.error(f"Upload record not found for job {job_id}")
-                
-                return result_key
+        print("[DEV MODE] Skipping AI try-on — using outfit image as generated output")
+
+        # Mock result
+        generated_file = outfit_file
+        generated_image_name = f"mock_generated_{generated_file.name}"
+
+        # Upload mock file
+        result_key = f"user_{user_id}/job_{job_id}/processed/{generated_image_name}"
+        s3.upload_file(str(generated_file), BUCKET_NAME, result_key)
+
+        print(f"[DEV MODE] Uploaded mock generated file to S3: {result_key}")
+
+        # Update database
+        with SessionLocal() as db:
+            upload_record = db.query(UserUpload).filter(UserUpload.id == job_id).first()
+            if upload_record:
+                upload_record.result_key = result_key
+                upload_record.status = UploadStatus.COMPLETED.value
+                db.commit()
+                db.refresh(upload_record)
+
+                print(f"Database updated for job {job_id}: COMPLETED")
             else:
-                raise FileNotFoundError(f"Generated image file not found: {generated_file}")
-        else:
-            raise FileNotFoundError(f"Generated images directory not found: {generated_images_dir}")
+                logger.error(f"Upload record not found for job {job_id}")
+
+        return result_key
 
     except Exception as e:
         logger.error(f"Error processing job {job_id}: {e}")
-        # Update database status to FAILED
+
+        # Update db → FAILED
         try:
             with SessionLocal() as db:
                 upload_record = db.query(UserUpload).filter(UserUpload.id == job_id).first()
                 if upload_record:
                     upload_record.status = UploadStatus.FAILED.value
                     db.commit()
-                    print(f"Database updated for job {job_id} - Status: FAILED")
+                    print(f"Database updated for job {job_id}: FAILED")
         except Exception as db_error:
-            logger.error(f"Error updating database status to FAILED for job {job_id}: {db_error}")
+            logger.error(f"DB update error for FAILED: {db_error}")
+
         raise
+
     finally:
-        # Cleanup temp files
         import shutil
         shutil.rmtree(temp_dir, ignore_errors=True)

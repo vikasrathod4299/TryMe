@@ -1,5 +1,6 @@
 import uuid
 import boto3
+import json
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.config.settings import settings
@@ -24,9 +25,9 @@ class UploadService(BaseRepository[UserUpload]):
     def __init__(self, db: Session):
         super().__init__(UserUpload, db)
 
-    def generate_s3_key(self, user_id:str, folder:str, filename:str):
+    def generate_s3_key(self, user_id:str, folder:str, filename:str, job_id:str) -> str:
         ext = filename.split('.')[-1]
-        key = f"users/{user_id}/{folder}/{uuid.uuid4()}.{ext}"
+        key = f"user_{user_id}/job_{job_id}/{folder}/{filename}_{uuid.uuid4()}.{ext}"
         return key
 
     def generate_upload_url(self, file_key:str, content_type:str = 'image/jpeg', expiration=3600) -> str:
@@ -52,16 +53,15 @@ class UploadService(BaseRepository[UserUpload]):
         )
 
     def add_user_upload(self, user_upload: UserUpload):
-        # Here you would typically add the user_upload instance to the database
 
-        self.create({
+        res = self.create({
             "user_id": user_upload.user_id,
             "avatar_key": user_upload.avatar_key,
             "outfit_key": user_upload.outfit_key,
             "status":   user_upload.status
         })
 
-        return user_upload
+        return res
     
     def verify_user_upload(self, avatar_key: str, outfit_key: str) -> bool:
         for key in [avatar_key, outfit_key]:
@@ -75,6 +75,7 @@ class UploadService(BaseRepository[UserUpload]):
     def enqueue_processing_job(self, job_data: dict):
         response = sqs_client.send_message(
             QueueUrl=settings.SQS_QUEUE_URL,
-            MessageBody=str(job_data)
+            MessageBody=json.dumps(job_data)
         )
         return response
+
