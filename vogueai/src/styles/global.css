@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global smoothness */
+html, body {
+  scroll-behavior: smooth;
+  background-color: #0f172a;
+  color-scheme: dark;
+}
+
+/* Hide scrollbar for slick UI */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 10px;
+}
+
+.animate-in {
+  opacity: 0;
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+.animate-gradient-x {
+  animation: gradient-x 8s ease infinite;
+}
+
