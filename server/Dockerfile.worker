@@ -1,0 +1,56 @@
+# ============================================
+# TryMe Worker Dockerfile
+# ============================================
+FROM python:3.12-slim AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv for fast package management
+RUN pip install uv
+
+WORKDIR /app
+
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies
+RUN uv sync --frozen --no-dev
+
+# ============================================
+# Production Image
+# ============================================
+FROM python:3.12-slim
+
+# Install runtime dependencies (includes OpenCV dependencies for mediapipe)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy virtual environment from builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Set PATH to use virtual environment
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/app"
+ENV PYTHONUNBUFFERED=1
+
+# Copy application code
+COPY . .
+
+# Create directories
+RUN mkdir -p /app/generated_images /tmp
+
+# Run the worker
+CMD ["python", "-m", "workers.worker"]

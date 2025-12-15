@@ -1,0 +1,63 @@
+{
+  "family": "vogueai-api",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::864624564506:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::864624564506:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "api",
+      "image": "864624564506.dkr.ecr.ap-south-1.amazonaws.com/vogueai-api:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "ENVIRONMENT", "value": "production" },
+        { "name": "DEBUG", "value": "false" },
+        { "name": "DB_HOST", "value": "YOUR_RDS_ENDPOINT" },
+        { "name": "DB_PORT", "value": "5432" },
+        { "name": "DB_NAME", "value": "vogueai" },
+        { "name": "DB_USER", "value": "postgres" },
+        { "name": "AWS_REGION", "value": "ap-south-1" },
+        { "name": "AWS_S3_BUCKET", "value": "YOUR_S3_BUCKET" },
+        { "name": "AWS_SQS_QUEUE_URL", "value": "YOUR_SQS_URL" },
+        { "name": "CORS_ORIGINS", "value": "*" }
+      ],
+      "secrets": [
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/db-password"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/jwt-secret"
+        },
+        {
+          "name": "GOOGLE_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/google-api-key"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/vogueai-api",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      },
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "family": "vogueai-worker",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::864624564506:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::864624564506:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "worker",
+      "image": "864624564506.dkr.ecr.ap-south-1.amazonaws.com/vogueai-worker:latest",
+      "essential": true,
+      "environment": [
+        { "name": "ENVIRONMENT", "value": "production" },
+        { "name": "DEBUG", "value": "false" },
+        { "name": "DB_HOST", "value": "YOUR_RDS_ENDPOINT" },
+        { "name": "DB_PORT", "value": "5432" },
+        { "name": "DB_NAME", "value": "vogueai" },
+        { "name": "DB_USER", "value": "postgres" },
+        { "name": "AWS_REGION", "value": "ap-south-1" },
+        { "name": "AWS_S3_BUCKET", "value": "YOUR_S3_BUCKET" },
+        { "name": "AWS_SQS_QUEUE_URL", "value": "YOUR_SQS_URL" }
+      ],
+      "secrets": [
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/db-password"
+        },
+        {
+          "name": "GOOGLE_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/google-api-key"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/vogueai-worker",
+          "awslogs-region": "ap-south-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
