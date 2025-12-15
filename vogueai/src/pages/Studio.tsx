@@ -44,7 +44,7 @@ export default function Studio() {
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-8 h-full animate-in fade-in duration-500">
+    <div className="grid lg:grid-cols-3 gap-8 h-full animate-fade-in fade-in duration-500">
       {/* LEFT PANEL */}
       <div className="space-y-6">
         <div className="bg-slate-900/50 border border-white/10 rounded-3xl p-6 backdrop-blur-md">

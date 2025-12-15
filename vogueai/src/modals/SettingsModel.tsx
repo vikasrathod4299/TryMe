@@ -52,7 +52,7 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
         {/* Content */}
         <div className="flex-1 p-8 overflow-y-auto">
           {active === "general" && (
-            <div className="space-y-4 animate-in fade-in">
+            <div className="space-y-4 animate-fade-in fade-in">
               <h3 className="text-lg font-bold text-white">Profile</h3>
 
               <input
@@ -70,7 +70,7 @@ export default function SettingsModal({ isOpen, onClose }: Props) {
           )}
 
           {active === "billing" && (
-            <div className="space-y-4 animate-in fade-in">
+            <div className="space-y-4 animate-fade-in fade-in">
               <h3 className="text-lg font-bold text-white">Current Plan</h3>
 
               <div className="p-6 rounded-2xl bg-gradient-to-br from-violet-600/20 to-indigo-600/20 border border-violet-500/30">

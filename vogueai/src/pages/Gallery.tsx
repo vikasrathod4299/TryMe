@@ -21,7 +21,7 @@ export default function Gallery() {
   ];
 
   return (
-    <div className="grid lg:grid-cols-2 gap-8 animate-in slide-in-from-bottom-5">
+    <div className="grid lg:grid-cols-2 gap-8 animate-fade-in slide-in-from-bottom-5">
       {items.map((item) => (
         <div
           key={item.id}

@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 interface RouterContextProps {
   currentPath: string;
@@ -12,9 +12,19 @@ const RouterContext = createContext<RouterContextProps>({
 });
 
 export const RouterProvider = ({ children }: { children: React.ReactNode }) => {
-  const [currentPath, setCurrentPath] = useState("/");
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   const navigate = (path: string) => {
+    window.history.pushState({}, "", path);
     setCurrentPath(path);
     window.scrollTo(0, 0);
   };
