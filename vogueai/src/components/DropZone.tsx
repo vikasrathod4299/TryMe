@@ -1,12 +1,13 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 interface DropZoneProps {
   icon: any;
   label: string;
   active?: boolean;
   preview?: string | null;
-  onUpload: () => void;
+  onFileSelect: (file: File) => void;
+  accept?: string;
 }
 
 export default function DropZone({
@@ -14,9 +15,27 @@ export default function DropZone({
   label,
   active,
   preview,
-  onUpload,
+  onFileSelect,
+  accept = "image/*",
 }: DropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onFileSelect(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      onFileSelect(file);
+    }
+  };
 
   return (
     <div
@@ -30,13 +49,16 @@ export default function DropZone({
         setIsDragging(true);
       }}
       onDragLeave={() => setIsDragging(false)}
-      onDrop={(e) => {
-        e.preventDefault();
-        setIsDragging(false);
-        onUpload();
-      }}
-      onClick={onUpload}
+      onDrop={handleDrop}
+      onClick={() => inputRef.current?.click()}
     >
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        onChange={handleFileChange}
+        className="hidden"
+      />
       {preview ? (
         <div className="absolute inset-0 w-full h-full">
           <img

@@ -154,7 +154,7 @@ export default function LandingPage() {
               <ul className="space-y-4 mb-8 text-slate-400">
                 <li className="flex items-center gap-3"><Check size={18} className="text-violet-400"/> 5 Daily Generations</li>
               </ul>
-              <button onClick={() => setAuthModalOpen(true)} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold border border-white/10 transition-all">
+              <button onClick={handleTryNow} className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold border border-white/10 transition-all">
                 Get Started
               </button>
             </div>
@@ -170,7 +170,7 @@ export default function LandingPage() {
                 <li className="flex items-center gap-3"><Check size={18} className="text-cyan-400"/> Unlimited Generations</li>
                 <li className="flex items-center gap-3"><Check size={18} className="text-cyan-400"/> Private Gallery</li>
               </ul>
-              <button onClick={() => setAuthModalOpen(true)} className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-violet-500/25 transition-all hover:scale-105">
+              <button onClick={handleTryNow} className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-violet-500/25 transition-all hover:scale-105">
                 Subscribe Now
               </button>
             </div>
@@ -226,7 +226,7 @@ export default function LandingPage() {
               <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">Join 50,000+ users experimenting with their style daily.</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button 
-                  onClick={() => setAuthModalOpen(true)}
+                  onClick={handleTryNow}
                   className="px-8 py-4 bg-white text-slate-950 rounded-full font-bold hover:scale-105 transition-transform"
                 >
                   Get Started Free

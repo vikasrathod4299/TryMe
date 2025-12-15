@@ -41,33 +41,32 @@ def process_job(jon_data):
     print(f"Downloaded files for job {job_id}")
 
     try:
-        # --------------------------------------------
-        # 🚫 REAL GENERATION DISABLED (Dev Mode)
-        # --------------------------------------------
-        # agent_state: AgentState = {
-        #     "person_img": str(avatar_file),
-        #     "garment_img": str(outfit_file),
-        #     "garment_description": "",
-        #     "generated_image": "",
-        #     "is_outfit_worn": False
-        # }
+        # Run AI try-on generation
+        agent_state: AgentState = {
+            "person_img": str(avatar_file),
+            "garment_img": str(outfit_file),
+            "garment_description": "",
+            "generated_image": "",
+            "is_outfit_worn": False
+        }
 
-        # print(f"Running Agent workflow for job {job_id}...")
-        # result_state = try_on_me(agent_state)
-        # generated_image_name = result_state.get("generated_image")
-        # --------------------------------------------
+        print(f"Running Agent workflow for job {job_id}...")
+        result_state = try_on_me(agent_state)
+        generated_image_path = result_state.get("generated_image")
 
-        print("[DEV MODE] Skipping AI try-on — using outfit image as generated output")
+        print(generated_image_path)
+        if not generated_image_path or not Path(generated_image_path).exists():
+            raise Exception("Generated image not found in agent result")
 
-        # Mock result
-        generated_file = outfit_file
-        generated_image_name = f"mock_generated_{generated_file.name}"
+        print(f"AI generation complete for job {job_id}: {generated_image_path}")
 
-        # Upload mock file
+        # Upload generated image to S3
+        generated_file = Path(generated_image_path)
+        generated_image_name = f"generated_{job_id}_{generated_file.name}"
         result_key = f"user_{user_id}/job_{job_id}/processed/{generated_image_name}"
+        
         s3.upload_file(str(generated_file), BUCKET_NAME, result_key)
-
-        print(f"[DEV MODE] Uploaded mock generated file to S3: {result_key}")
+        print(f"Uploaded generated image to S3: {result_key}")
 
         # Update database
         with SessionLocal() as db:
@@ -83,6 +82,7 @@ def process_job(jon_data):
                 logger.error(f"Upload record not found for job {job_id}")
 
         return result_key
+
 
     except Exception as e:
         logger.error(f"Error processing job {job_id}: {e}")
