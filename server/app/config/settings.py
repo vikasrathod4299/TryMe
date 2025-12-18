@@ -52,6 +52,17 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = "your-openai-api-key"
     GEMINI_API_KEY: str = "your-gemini-api-key"
 
+    # =============================================================================
+    # RAZORPAY CONFIGURATION (Payments - India)
+    # =============================================================================
+    RAZORPAY_KEY_ID: str = "rzp_test_Rt4bYvSMeaAE7g"
+    RAZORPAY_KEY_SECRET: str = "97ArYDA863qoz53xUCUAb95b"
+
+    # =============================================================================
+    # CREDITS CONFIGURATION
+    # =============================================================================
+    FREE_CREDITS_ON_SIGNUP: int = 3
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

@@ -27,5 +27,7 @@ dependencies = [
     "boto3>=1.40.31",
     "python-multipart>=0.0.20",
     "bcrypt>=5.0.0",
+    "stripe>=14.1.0",
+    "razorpay>=2.0.0",
 ]
 

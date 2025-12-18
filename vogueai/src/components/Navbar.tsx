@@ -1,5 +1,6 @@
-import { Sparkles, Image as ImageIcon, LogOut, Menu, X } from "lucide-react";
+import { Sparkles, Image as ImageIcon, LogOut, Menu, X, Coins } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useCredits } from "../context/CreditsContext";
 import { useRouter } from "../router/RouterProvider";
 import { useEffect, useState } from "react";
 
@@ -12,6 +13,7 @@ const menuItems = [
 
 export default function Navbar() {
   const { user, logout, openAuthModal } = useAuth();
+  const { balance, openTopUpModal } = useCredits();
   const { navigate, currentPath } = useRouter();
   const [menuState, setMenuState] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -193,6 +195,17 @@ export default function Navbar() {
                   </>
                 ) : (
                   <div className="flex items-center gap-3">
+                    {/* Credits Display */}
+                    <button
+                      onClick={openTopUpModal}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30 hover:border-amber-500/50 rounded-full transition-all cursor-pointer"
+                      title="Top up credits"
+                    >
+                      <Coins className="size-4 text-amber-400" />
+                      <span className="text-sm font-medium text-amber-300">{balance}</span>
+                    </button>
+                    
+                    {/* User Profile */}
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full">
                       <div className="size-5 rounded-full bg-gradient-to-r from-pink-500 to-violet-500" />
                       <span className="text-sm text-white/80">{user.full_name}</span>

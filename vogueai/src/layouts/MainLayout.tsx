@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar.tsx";
 import NebulaShader from "../components/NebulaShader.tsx";
 import AuthModal from "../modals/AuthModal.tsx";
+import TopUpModal from "../modals/TopUpModal.tsx";
 
 import LandingPage from "../pages/LandingPage";
 import Studio from "../pages/Studio";
@@ -45,6 +46,7 @@ export default function MainLayout() {
     <div className="min-h-screen bg-slate-950 text-white relative">
       <NebulaShader />
       <AuthModal />
+      <TopUpModal />
 
       <div className="relative z-20">
         <Navbar />

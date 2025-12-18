@@ -1,7 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { LayoutGrid, User, Shirt, Sparkles, Loader2, Wand2, Download, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import DropZone from "../components/DropZone";
+import { useCredits } from "../context/CreditsContext";
+import { useVerifyPayment } from "../hooks/useCredits";
 import {
   generateUploadURL,
   uploadToS3,
@@ -22,6 +24,39 @@ export default function Studio() {
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const { refreshBalance } = useCredits();
+  const verifyPayment = useVerifyPayment();
+
+  // Handle payment success callback
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const payment = urlParams.get("payment");
+    const sessionId = urlParams.get("session_id");
+
+    if (payment === "success" && sessionId) {
+      // Verify the payment and add credits
+      verifyPayment.mutate(sessionId, {
+        onSuccess: (result) => {
+          if (result.success) {
+            showSuccess(`Payment successful! Added ${result.credits_added} credits. New balance: ${result.new_balance}`);
+            refreshBalance();
+          } else {
+            setError(result.message);
+          }
+        },
+        onError: (err) => {
+          console.error("Payment verification failed:", err);
+        },
+      });
+
+      // Clean up URL
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (payment === "cancelled") {
+      setError("Payment was cancelled");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   // Clear success message after 3 seconds
   const showSuccess = (message: string) => {
@@ -237,56 +272,87 @@ export default function Studio() {
         )}
 
         {loadingStatus && (
-          <div className="absolute inset-0 bg-slate-900/80 flex items-center justify-center backdrop-blur-sm z-10">
-            <div className="w-80 space-y-4">
-              {/* Animated spinner */}
-              <div className="flex justify-center mb-4">
-                <div className="relative">
-                  <div className="size-16 rounded-full border-4 border-slate-700"></div>
-                  <div className="absolute inset-0 size-16 rounded-full border-4 border-transparent border-t-violet-500 animate-spin"></div>
-                  <Sparkles className="absolute inset-0 m-auto size-6 text-violet-400" />
+          <div className="absolute inset-0 bg-slate-900/90 flex items-center justify-center backdrop-blur-sm z-10">
+            <div className="flex flex-col items-center gap-6">
+              {/* Minimal step indicators */}
+              <div className="flex items-center gap-3">
+                {/* Step 1: Uploading */}
+                <div className="flex items-center gap-2">
+                  <div className={`size-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    loadingStatus === "uploading" 
+                      ? "bg-violet-500 ring-2 ring-violet-400/50" 
+                      : progress >= 40 
+                        ? "bg-violet-500/80" 
+                        : "bg-slate-700"
+                  }`}>
+                    {loadingStatus === "uploading" ? (
+                      <Loader2 size={14} className="text-white animate-spin" />
+                    ) : progress >= 40 ? (
+                      <CheckCircle2 size={14} className="text-white" />
+                    ) : (
+                      <span className="text-xs text-slate-400">1</span>
+                    )}
+                  </div>
+                  <span className={`text-xs font-medium ${loadingStatus === "uploading" ? "text-violet-300" : progress >= 40 ? "text-slate-300" : "text-slate-500"}`}>
+                    Uploading
+                  </span>
                 </div>
-              </div>
-              
-              {/* Progress bar */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-mono">
-                  <span className="text-violet-300">PROGRESS</span>
-                  <span className="text-cyan-300">{progress}%</span>
+
+                <div className={`w-8 h-px ${progress >= 40 ? "bg-violet-500/50" : "bg-slate-700"}`} />
+
+                {/* Step 2: Extracting Outfit */}
+                <div className="flex items-center gap-2">
+                  <div className={`size-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    loadingStatus === "processing" 
+                      ? "bg-purple-500 ring-2 ring-purple-400/50" 
+                      : progress >= 90 
+                        ? "bg-purple-500/80" 
+                        : "bg-slate-700"
+                  }`}>
+                    {loadingStatus === "processing" ? (
+                      <Loader2 size={14} className="text-white animate-spin" />
+                    ) : progress >= 90 ? (
+                      <CheckCircle2 size={14} className="text-white" />
+                    ) : (
+                      <span className="text-xs text-slate-400">2</span>
+                    )}
+                  </div>
+                  <span className={`text-xs font-medium ${loadingStatus === "processing" ? "text-purple-300" : progress >= 90 ? "text-slate-300" : "text-slate-500"}`}>
+                    Extracting
+                  </span>
                 </div>
-                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-violet-500 via-purple-500 to-cyan-500 transition-all duration-500 ease-out"
-                    style={{ width: `${progress}%` }}
-                  />
+
+                <div className={`w-8 h-px ${progress >= 90 ? "bg-purple-500/50" : "bg-slate-700"}`} />
+
+                {/* Step 3: Applying Outfit */}
+                <div className="flex items-center gap-2">
+                  <div className={`size-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                    loadingStatus === "generating" 
+                      ? "bg-cyan-500 ring-2 ring-cyan-400/50" 
+                      : progress >= 100 
+                        ? "bg-cyan-500/80" 
+                        : "bg-slate-700"
+                  }`}>
+                    {loadingStatus === "generating" ? (
+                      <Loader2 size={14} className="text-white animate-spin" />
+                    ) : progress >= 100 ? (
+                      <CheckCircle2 size={14} className="text-white" />
+                    ) : (
+                      <span className="text-xs text-slate-400">3</span>
+                    )}
+                  </div>
+                  <span className={`text-xs font-medium ${loadingStatus === "generating" ? "text-cyan-300" : progress >= 100 ? "text-slate-300" : "text-slate-500"}`}>
+                    Applying
+                  </span>
                 </div>
               </div>
 
-              {/* Live status message */}
-              <div className="text-center space-y-2">
-                <p className="text-white font-medium text-sm">
-                  {statusMessage}
-                </p>
-                <p className="text-slate-500 text-xs">
-                  This may take up to a minute...
-                </p>
-              </div>
-
-              {/* Step indicators */}
-              <div className="flex justify-center gap-6 pt-2">
-                <div className={`flex flex-col items-center gap-1 ${progress >= 10 ? 'text-violet-400' : 'text-slate-600'}`}>
-                  <div className={`size-2 rounded-full ${progress >= 10 ? 'bg-violet-400' : 'bg-slate-600'}`}></div>
-                  <span className="text-xs">Upload</span>
-                </div>
-                <div className={`flex flex-col items-center gap-1 ${progress >= 40 ? 'text-purple-400' : 'text-slate-600'}`}>
-                  <div className={`size-2 rounded-full ${progress >= 40 ? 'bg-purple-400' : 'bg-slate-600'}`}></div>
-                  <span className="text-xs">Process</span>
-                </div>
-                <div className={`flex flex-col items-center gap-1 ${progress >= 90 ? 'text-cyan-400' : 'text-slate-600'}`}>
-                  <div className={`size-2 rounded-full ${progress >= 90 ? 'bg-cyan-400' : 'bg-slate-600'}`}></div>
-                  <span className="text-xs">Generate</span>
-                </div>
-              </div>
+              {/* Current status text */}
+              <p className="text-slate-400 text-sm">
+                {loadingStatus === "uploading" && "Uploading images..."}
+                {loadingStatus === "processing" && "Extracting outfit details..."}
+                {loadingStatus === "generating" && "Applying outfit to your photo..."}
+              </p>
             </div>
           </div>
         )}
