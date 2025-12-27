@@ -7,19 +7,25 @@ from app.config.settings import settings
 from app.upload.model import UserUpload 
 from app.utils.repository import BaseRepository
 
-s3_client = boto3.client(
-    "s3",
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    region_name=settings.AWS_REGION,
-)
-
-sqs_client = boto3.client(
-    "sqs",
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    region_name=settings.AWS_REGION,
-)
+# Use IAM role credentials in production, explicit credentials in development
+if settings.ENVIRONMENT == "production":
+    # Let boto3 use IAM role credentials from ECS task role
+    s3_client = boto3.client("s3", region_name=settings.AWS_REGION)
+    sqs_client = boto3.client("sqs", region_name=settings.AWS_REGION)
+else:
+    # Use explicit credentials for local development
+    s3_client = boto3.client(
+        "s3",
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_REGION,
+    )
+    sqs_client = boto3.client(
+        "sqs",
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_REGION,
+    )
 
 class UploadService(BaseRepository[UserUpload]):
     def __init__(self, db: Session):

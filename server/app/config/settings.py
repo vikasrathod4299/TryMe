@@ -55,8 +55,8 @@ class Settings(BaseSettings):
     # =============================================================================
     # RAZORPAY CONFIGURATION (Payments - India)
     # =============================================================================
-    RAZORPAY_KEY_ID: str = "rzp_test_Rt4bYvSMeaAE7g"
-    RAZORPAY_KEY_SECRET: str = "97ArYDA863qoz53xUCUAb95b"
+    RAZORPAY_KEY_ID: str = ""
+    RAZORPAY_KEY_SECRET: str = ""
 
     # =============================================================================
     # CREDITS CONFIGURATION

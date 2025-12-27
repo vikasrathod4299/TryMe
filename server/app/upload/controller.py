@@ -39,13 +39,13 @@ class UploadController:
         return UploadResponse(
             avatar={
                 "upload_url": self.uploadService.generate_upload_url(
-                    avatar_key, content_type="image/jpeg"
+                    avatar_key, content_type=req.avatar_content_type
                 ),
                 "key": avatar_key,
             },
             outfit={
                 "upload_url": self.uploadService.generate_upload_url(
-                    outfit_key, content_type="image/jpeg"
+                    outfit_key, content_type=req.outfit_content_type
                 ),
                 "key": outfit_key,
             },

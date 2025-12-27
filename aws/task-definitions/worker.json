@@ -2,8 +2,8 @@
   "family": "vogueai-worker",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
-  "cpu": "512",
-  "memory": "1024",
+  "cpu": "1024",
+  "memory": "2048",
   "executionRoleArn": "arn:aws:iam::864624564506:role/ecsTaskExecutionRole",
   "taskRoleArn": "arn:aws:iam::864624564506:role/ecsTaskRole",
   "containerDefinitions": [
@@ -13,23 +13,24 @@
       "essential": true,
       "environment": [
         { "name": "ENVIRONMENT", "value": "production" },
-        { "name": "DEBUG", "value": "false" },
-        { "name": "DB_HOST", "value": "YOUR_RDS_ENDPOINT" },
-        { "name": "DB_PORT", "value": "5432" },
-        { "name": "DB_NAME", "value": "vogueai" },
-        { "name": "DB_USER", "value": "postgres" },
+        { "name": "DEBUG", "value": "False" },
+        { "name": "LOG_LEVEL", "value": "INFO" },
         { "name": "AWS_REGION", "value": "ap-south-1" },
-        { "name": "AWS_S3_BUCKET", "value": "YOUR_S3_BUCKET" },
-        { "name": "AWS_SQS_QUEUE_URL", "value": "YOUR_SQS_URL" }
+        { "name": "S3_BUCKET_NAME", "value": "outfit-checker-dev" },
+        { "name": "SQS_QUEUE_URL", "value": "https://sqs.ap-south-1.amazonaws.com/864624564506/outfit-checker-jobs" }
       ],
       "secrets": [
         {
-          "name": "DB_PASSWORD",
-          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/db-password"
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/database-url-DR6vrQ"
         },
         {
-          "name": "GOOGLE_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/google-api-key"
+          "name": "GEMINI_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/google-api-key-Q7suRV"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:864624564506:secret:vogueai/openai-api-key-yoIA9z"
         }
       ],
       "logConfiguration": {

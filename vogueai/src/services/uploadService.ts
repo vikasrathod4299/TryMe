@@ -38,13 +38,19 @@ export interface JobStatusResponse {
 export const generateUploadURL = async ({
   avatar_filename,
   outfit_filename,
+  avatar_content_type,
+  outfit_content_type,
 }: {
   avatar_filename: string;
   outfit_filename: string;
+  avatar_content_type: string;
+  outfit_content_type: string;
 }): Promise<UploadURLResponse> => {
   const result = await protectedApi.post("/upload/generate-upload-urls", {
     avatar_filename,
     outfit_filename,
+    avatar_content_type,
+    outfit_content_type,
   });
   return result.data;
 };

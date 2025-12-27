@@ -42,8 +42,8 @@ export default function DropZone({
       className={`relative group cursor-pointer transition-all duration-300 ease-out
       ${active ? "ring-2 ring-violet-500 bg-violet-500/10" : "hover:bg-white/5"}
       ${isDragging ? "scale-105 ring-2 ring-cyan-400 bg-cyan-400/10" : ""}
-      border-2 border-dashed border-white/20 rounded-2xl p-8
-      flex flex-col items-center justify-center h-64 w-full backdrop-blur-sm overflow-hidden`}
+      border-2 border-dashed border-white/20 rounded-xl lg:rounded-2xl p-4 lg:p-8
+      flex flex-col items-center justify-center h-32 sm:h-40 lg:h-64 w-full backdrop-blur-sm overflow-hidden`}
       onDragOver={(e) => {
         e.preventDefault();
         setIsDragging(true);
@@ -67,24 +67,27 @@ export default function DropZone({
             className="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-500"
           />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <p className="text-white text-sm font-medium">Change Image</p>
+            <p className="text-white text-xs lg:text-sm font-medium">Change Image</p>
           </div>
         </div>
       ) : (
         <>
           <div
-            className={`p-4 rounded-full mb-4 transition-colors duration-300
+            className={`p-2.5 lg:p-4 rounded-full mb-2 lg:mb-4 transition-colors duration-300
             ${
               isDragging
                 ? "bg-cyan-500/20 text-cyan-400"
                 : "bg-white/5 text-white/60 group-hover:text-violet-400 group-hover:bg-violet-500/20"
             }`}
           >
-            <Icon size={32} />
+            <Icon size={20} className="lg:w-8 lg:h-8" />
           </div>
-          <h3 className="text-white font-semibold mb-2">{label}</h3>
-          <p className="text-white/40 text-sm text-center">
+          <h3 className="text-white font-semibold mb-1 lg:mb-2 text-xs lg:text-base">{label}</h3>
+          <p className="text-white/40 text-[10px] lg:text-sm text-center hidden sm:block">
             Drag & drop or click to upload
+          </p>
+          <p className="text-white/40 text-[10px] text-center sm:hidden">
+            Tap to upload
           </p>
         </>
       )}
