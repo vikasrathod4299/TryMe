@@ -1,0 +1,25 @@
+{
+    "VpcEndpoint": {
+        "VpcEndpointId": "vpce-007b6008c278b00b2",
+        "VpcEndpointType": "Gateway",
+        "VpcId": "vpc-0b41584ed7178313f",
+        "ServiceName": "com.amazonaws.ap-south-1.s3",
+        "State": "available",
+        "PolicyDocument": "{\"Version\":\"2008-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"*\",\"Resource\":\"*\"}]}",
+        "RouteTableIds": [
+            "rtb-078878c9aec7dd745"
+        ],
+        "SubnetIds": [],
+        "Groups": [],
+        "IpAddressType": "ipv4",
+        "DnsOptions": {
+            "DnsRecordIpType": "service-defined"
+        },
+        "PrivateDnsEnabled": false,
+        "RequesterManaged": false,
+        "NetworkInterfaceIds": [],
+        "DnsEntries": [],
+        "CreationTimestamp": "2025-12-28T16:20:55+00:00",
+        "OwnerId": "864624564506"
+    }
+}

@@ -4,3 +4,4 @@ __pycache__/
 .python-version/
 experiements/
 generated_images/
+.aws-sam

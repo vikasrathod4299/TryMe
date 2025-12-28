@@ -1,5 +1,6 @@
 
 import { useState, useRef } from "react";
+import { Camera, Check } from "lucide-react";
 
 interface DropZoneProps {
   icon: any;
@@ -40,10 +41,13 @@ export default function DropZone({
   return (
     <div
       className={`relative group cursor-pointer transition-all duration-300 ease-out
-      ${active ? "ring-2 ring-violet-500 bg-violet-500/10" : "hover:bg-white/5"}
-      ${isDragging ? "scale-105 ring-2 ring-cyan-400 bg-cyan-400/10" : ""}
-      border-2 border-dashed border-white/20 rounded-xl lg:rounded-2xl p-4 lg:p-8
-      flex flex-col items-center justify-center h-32 sm:h-40 lg:h-64 w-full backdrop-blur-sm overflow-hidden`}
+      ${active 
+        ? "ring-2 ring-violet-500/50 bg-gradient-to-b from-violet-500/10 to-purple-500/5" 
+        : "hover:bg-slate-800/50 hover:border-slate-600"
+      }
+      ${isDragging ? "scale-[1.02] ring-2 ring-cyan-400 bg-cyan-400/10 border-cyan-400" : ""}
+      border border-slate-700/50 rounded-xl sm:rounded-xl lg:rounded-2xl
+      flex flex-col items-center justify-center aspect-square sm:aspect-[3/4] w-full backdrop-blur-sm overflow-hidden`}
       onDragOver={(e) => {
         e.preventDefault();
         setIsDragging(true);
@@ -64,32 +68,52 @@ export default function DropZone({
           <img
             src={preview}
             alt="Preview"
-            className="w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <p className="text-white text-xs lg:text-sm font-medium">Change Image</p>
+          {/* Overlay on hover */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end pb-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-md rounded-lg border border-white/20">
+              <Camera size={14} className="text-white" />
+              <span className="text-white text-xs font-medium">Change</span>
+            </div>
+          </div>
+          {/* Success indicator */}
+          <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg">
+            <Check size={14} className="text-white" />
           </div>
         </div>
       ) : (
-        <>
+        <div className="flex flex-col items-center justify-center p-3 sm:p-4">
+          {/* Icon container */}
           <div
-            className={`p-2.5 lg:p-4 rounded-full mb-2 lg:mb-4 transition-colors duration-300
+            className={`p-3 sm:p-4 lg:p-5 rounded-xl sm:rounded-2xl mb-2 sm:mb-3 lg:mb-4 transition-all duration-300
             ${
               isDragging
-                ? "bg-cyan-500/20 text-cyan-400"
-                : "bg-white/5 text-white/60 group-hover:text-violet-400 group-hover:bg-violet-500/20"
+                ? "bg-cyan-500/20 text-cyan-400 scale-110"
+                : "bg-slate-800/80 text-slate-400 group-hover:text-violet-400 group-hover:bg-violet-500/20 group-hover:scale-105"
             }`}
           >
-            <Icon size={20} className="lg:w-8 lg:h-8" />
+            <Icon size={20} className="sm:w-6 sm:h-6 lg:w-8 lg:h-8" />
           </div>
-          <h3 className="text-white font-semibold mb-1 lg:mb-2 text-xs lg:text-base">{label}</h3>
-          <p className="text-white/40 text-[10px] lg:text-sm text-center hidden sm:block">
-            Drag & drop or click to upload
+          
+          {/* Label */}
+          <h3 className={`font-semibold mb-0.5 sm:mb-1 text-xs sm:text-sm lg:text-base transition-colors ${
+            isDragging ? "text-cyan-300" : "text-white group-hover:text-violet-300"
+          }`}>
+            {label}
+          </h3>
+          
+          {/* Subtitle */}
+          <p className="text-slate-500 text-[10px] sm:text-[11px] lg:text-xs text-center max-w-[100px] sm:max-w-[120px]">
+            <span className="hidden sm:inline">Drag & drop or </span>
+            <span className="text-slate-400">Tap to upload</span>
           </p>
-          <p className="text-white/40 text-[10px] text-center sm:hidden">
-            Tap to upload
+          
+          {/* Supported formats hint */}
+          <p className="text-slate-600 text-[10px] mt-2 hidden lg:block">
+            JPG, PNG, WebP
           </p>
-        </>
+        </div>
       )}
     </div>
   );

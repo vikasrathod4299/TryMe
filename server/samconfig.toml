@@ -1,0 +1,27 @@
+# SAM CLI Configuration File
+# This file stores default parameters for SAM CLI commands
+
+version = 0.1
+
+[default.global.parameters]
+stack_name = "vogueai-serverless"
+
+[default.build.parameters]
+cached = true
+parallel = true
+use_container = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+resolve_s3 = true
+region = "ap-south-1"
+
+[default.sync.parameters]
+watch = true
+
+[default.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[default.local_start_lambda.parameters]
+warm_containers = "EAGER"

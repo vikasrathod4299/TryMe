@@ -6,18 +6,31 @@ from app import logger
 from Agent.nodes import try_on_me
 from Agent.state import AgentState
 from app.config.database import SessionLocal
-from app.upload.model import UserUpload, UploadStatus
+# Import all models to resolve relationships
+from app.models import User, UserUpload, UserCredits, CreditTransaction, RefreshToken
+from app.upload.model import UploadStatus
+from app.config.settings import settings
 
 load_dotenv()
 
-s3 = boto3.client(
-    's3',
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    region_name=os.getenv('AWS_REGION')
-)
+# In Lambda, use IAM role credentials (boto3 handles this automatically)
+# In local development, use explicit credentials from settings
+is_lambda = os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is not None
+region = os.environ.get("AWS_REGION", settings.AWS_REGION)
 
-BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
+if is_lambda or settings.ENVIRONMENT == "production":
+    # Let boto3 use IAM role credentials
+    s3 = boto3.client("s3", region_name=region)
+else:
+    # Use explicit credentials for local development
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=region
+    )
+
+BUCKET_NAME = settings.S3_BUCKET_NAME
 
 def process_job(jon_data):
     avatar_key = jon_data['avatar_key']

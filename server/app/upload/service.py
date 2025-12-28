@@ -1,30 +1,43 @@
 import uuid
 import boto3
+from botocore.config import Config
 import json
+import os
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.config.settings import settings
 from app.upload.model import UserUpload 
 from app.utils.repository import BaseRepository
 
-# Use IAM role credentials in production, explicit credentials in development
-if settings.ENVIRONMENT == "production":
-    # Let boto3 use IAM role credentials from ECS task role
-    s3_client = boto3.client("s3", region_name=settings.AWS_REGION)
-    sqs_client = boto3.client("sqs", region_name=settings.AWS_REGION)
+# In Lambda/production, use IAM role credentials (boto3 handles this automatically)
+# In local development, use explicit credentials from settings
+is_lambda = os.environ.get("AWS_LAMBDA_FUNCTION_NAME") is not None
+region = os.environ.get("AWS_REGION", settings.AWS_REGION)
+
+# Configure S3 to use virtual-hosted style URLs with the correct region
+s3_config = Config(
+    region_name=region,
+    signature_version='s3v4',
+    s3={'addressing_style': 'virtual'}
+)
+
+if is_lambda or settings.ENVIRONMENT == "production":
+    # Let boto3 use IAM role credentials
+    s3_client = boto3.client("s3", config=s3_config)
+    sqs_client = boto3.client("sqs", region_name=region)
 else:
     # Use explicit credentials for local development
     s3_client = boto3.client(
         "s3",
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        region_name=settings.AWS_REGION,
+        config=s3_config,
     )
     sqs_client = boto3.client(
         "sqs",
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        region_name=settings.AWS_REGION,
+        region_name=region,
     )
 
 class UploadService(BaseRepository[UserUpload]):

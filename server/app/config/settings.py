@@ -1,4 +1,7 @@
 from pydantic_settings import BaseSettings 
+from pydantic import field_validator
+from typing import Union
+import json
 
 class Settings(BaseSettings):
     # =============================================================================
@@ -38,16 +41,33 @@ class Settings(BaseSettings):
     # =============================================================================
     # CORS CONFIGURATION
     # =============================================================================
-    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173","http://localhost:3000","http://localhost:8000","http://localhost:8080"]
+    BACKEND_CORS_ORIGINS: Union[list[str], str] = ["http://localhost:5173","http://localhost:3000","http://localhost:8000","http://localhost:8080"]
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        """Parse CORS origins from string (comma-separated or JSON) or list."""
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            # Try JSON first
+            if v.startswith("["):
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    pass
+            # Fallback to comma-separated
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
 
     # =============================================================================
     # AWS S3 CONFIGURATION
     # =============================================================================
-    AWS_ACCESS_KEY_ID: str = "your-aws-access-key-id"
-    AWS_SECRET_ACCESS_KEY: str = "your-aws-secret-access-key"
-    AWS_REGION: str = "your-aws-region"
-    S3_BUCKET_NAME: str = "your-s3-bucket-name"
-    SQS_QUEUE_URL: str = "https://sqs.ap-south-1.amazonaws.com/your-account/outfit-checker-jobs"
+    AWS_ACCESS_KEY_ID: str = ""
+    AWS_SECRET_ACCESS_KEY: str = ""
+    AWS_REGION: str = "ap-south-1"
+    S3_BUCKET_NAME: str = ""
+    SQS_QUEUE_URL: str = ""
 
     OPENAI_API_KEY: str = "your-openai-api-key"
     GEMINI_API_KEY: str = "your-gemini-api-key"

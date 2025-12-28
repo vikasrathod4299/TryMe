@@ -1,0 +1,39 @@
+# Core API
+fastapi>=0.116.1
+mangum>=0.19.0
+pydantic[email]>=2.11.7
+pydantic-settings>=2.10.1
+python-multipart>=0.0.20
+email-validator>=2.0.0
+
+# AI/ML
+google-genai>=1.32.0
+langchain>=0.3.27
+langchain-openai>=0.3.32
+langgraph>=0.6.6
+pillow>=11.3.0
+numpy>=1.26.4
+
+# Note: mediapipe is heavy and may cause Lambda package size issues
+# Consider using a Lambda layer or removing if not critical
+# mediapipe>=0.10.21
+
+# Database
+sqlalchemy>=2.0.43
+psycopg2-binary>=2.9.10
+alembic>=1.16.5
+
+# AWS
+boto3>=1.40.31
+
+# Auth
+pyjwt>=2.10.1
+passlib>=1.7.4
+bcrypt>=5.0.0
+
+# Payments
+stripe>=14.1.0
+razorpay>=2.0.0
+
+# Utils
+python-dotenv>=1.1.1

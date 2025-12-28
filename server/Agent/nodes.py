@@ -163,7 +163,7 @@ def get_outfit_photo(images: str) -> str:
     logger.info(f"Extracting outfit from worn image: {images}")
 
     response = genai_client.models.generate_content(
-        model="gemini-2.5-flash-image-preview",
+        model="gemini-3-pro-image-preview",
         contents=[dress_image, prompt],
         config=gemini_config,
     )
@@ -190,7 +190,8 @@ def get_outfit_photo(images: str) -> str:
         image = Image.open(BytesIO(image_parts[0]))
         # Use unique filename with timestamp to avoid conflicts between jobs
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-        extracted_dir = Path("generated_images")
+        # Use /tmp for Lambda compatibility (works locally too)
+        extracted_dir = Path("/tmp/generated_images")
         extracted_dir.mkdir(parents=True, exist_ok=True)
         filename = extracted_dir / f"extracted_outfit_{ts}.png"
         image.save(filename)
@@ -295,7 +296,8 @@ The output image must show the person wearing the NEW garment, not their origina
     ]
 
     if image_parts:
-        DIR=Path('generated_images')
+        # Use /tmp for Lambda compatibility (works locally too)
+        DIR = Path('/tmp/generated_images')
         DIR.mkdir(parents=True, exist_ok=True)
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
         file_name = f"fashion_ecommerce_shot_{ts}.png"
@@ -304,7 +306,7 @@ The output image must show the person wearing the NEW garment, not their origina
         generated_image.save(file_path)
         
         # Validate that the generated image visually differs from input using perceptual hashing
-        outfit_changed = _verify_outfit_changed(person_img, generated_image)
+        outfit_changed = _verify_outfit_changed(person_img, generated_image, similarity_threshold=0.95)
         
         if not outfit_changed:
             logger.error("Generated image is visually too similar to input - outfit was not applied")
