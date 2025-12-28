@@ -179,18 +179,18 @@ export default function Studio() {
     <div className="min-h-[calc(100vh-80px)] sm:min-h-[calc(100vh-120px)] animate-fade-in pb-6">
       {/* Main Container */}
       <div className="max-w-7xl mx-auto">
-        {/* Header Section - Compact on mobile */}
-        <div className="text-center mb-4 sm:mb-8 lg:mb-12">
-          <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold text-white mb-1 sm:mb-3">
+        {/* Header Section - Hidden on mobile */}
+        <div className="text-center mb-4 sm:mb-8 lg:mb-12 hidden sm:block">
+          <h1 className="text-2xl lg:text-4xl font-bold text-white mb-3">
             Virtual Try-On <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-purple-400">Studio</span>
           </h1>
-          <p className="text-slate-400 text-xs sm:text-sm lg:text-base max-w-md mx-auto hidden sm:block">
+          <p className="text-slate-400 text-sm lg:text-base max-w-md mx-auto">
             Upload your photo and any outfit to see how it looks on you instantly
           </p>
         </div>
 
         {/* Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-6 lg:gap-10">
           
           {/* LEFT: Upload Section */}
           <div className="space-y-4 sm:space-y-6">
@@ -338,95 +338,66 @@ export default function Studio() {
                 </div>
               )}
 
-              {/* Loading State */}
+              {/* Loading State - Compact inline for all screens */}
               {loadingStatus && (
-                <div className="absolute inset-0 bg-slate-900/95 flex items-center justify-center backdrop-blur-md z-10 p-4 sm:p-6">
-                  <div className="flex flex-col items-center gap-4 sm:gap-8 w-full max-w-sm">
-                    {/* Animated loader */}
-                    <div className="relative">
-                      <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border-4 border-slate-700"></div>
-                      <div className="absolute inset-0 w-14 h-14 sm:w-20 sm:h-20 rounded-full border-4 border-transparent border-t-violet-500 animate-spin"></div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Sparkles size={18} className="sm:w-6 sm:h-6 text-violet-400" />
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900/98 to-slate-900 flex flex-col items-center justify-center backdrop-blur-md z-10 p-4">
+                  
+                  {/* Progress Circle */}
+                  <div className="relative mb-4">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24">
+                      <svg className="w-full h-full -rotate-90">
+                        <circle cx="50%" cy="50%" r="45%" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-700/50" />
+                        <circle cx="50%" cy="50%" r="45%" fill="none" stroke="url(#progressGradient)" strokeWidth="3" strokeLinecap="round"
+                          strokeDasharray={`${progress * 2.83} 283`} className="transition-all duration-500" />
+                        <defs>
+                          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#8b5cf6" />
+                            <stop offset="100%" stopColor="#06b6d4" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-violet-400 animate-pulse" />
+                        <span className="text-sm sm:text-base font-bold text-white mt-0.5">{Math.round(progress)}%</span>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Progress Steps */}
-                    <div className="w-full space-y-2 sm:space-y-4">
-                      {/* Step 1: Upload */}
-                      <div className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 ${
-                        loadingStatus === "uploading" ? "bg-violet-500/10 border border-violet-500/30" : 
-                        progress >= 40 ? "bg-emerald-500/5 border border-emerald-500/20" : "bg-slate-800/50 border border-slate-700/50"
-                      }`}>
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          loadingStatus === "uploading" ? "bg-violet-500" : 
-                          progress >= 40 ? "bg-emerald-500" : "bg-slate-700"
-                        }`}>
-                          {loadingStatus === "uploading" ? (
-                            <Loader2 size={18} className="text-white animate-spin" />
-                          ) : progress >= 40 ? (
-                            <CheckCircle2 size={18} className="text-white" />
-                          ) : (
-                            <Upload size={18} className="text-slate-400" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className={`text-sm font-medium ${loadingStatus === "uploading" ? "text-violet-300" : progress >= 40 ? "text-emerald-300" : "text-slate-400"}`}>
-                            Uploading Images
-                          </p>
-                          <p className="text-xs text-slate-500">Sending to cloud</p>
-                        </div>
-                      </div>
+                  {/* Status */}
+                  <p className="text-white font-medium text-sm sm:text-base mb-1">
+                    {loadingStatus === "uploading" && "Uploading..."}
+                    {loadingStatus === "processing" && "Analyzing..."}
+                    {loadingStatus === "generating" && "Creating..."}
+                  </p>
+                  <p className="text-slate-500 text-xs mb-4">~30 sec</p>
 
-                      {/* Step 2: Processing */}
-                      <div className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 ${
-                        loadingStatus === "processing" ? "bg-purple-500/10 border border-purple-500/30" : 
-                        progress >= 90 ? "bg-emerald-500/5 border border-emerald-500/20" : "bg-slate-800/50 border border-slate-700/50"
-                      }`}>
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          loadingStatus === "processing" ? "bg-purple-500" : 
-                          progress >= 90 ? "bg-emerald-500" : "bg-slate-700"
-                        }`}>
-                          {loadingStatus === "processing" ? (
-                            <Loader2 size={18} className="text-white animate-spin" />
-                          ) : progress >= 90 ? (
-                            <CheckCircle2 size={18} className="text-white" />
-                          ) : (
-                            <Shirt size={18} className="text-slate-400" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className={`text-sm font-medium ${loadingStatus === "processing" ? "text-purple-300" : progress >= 90 ? "text-emerald-300" : "text-slate-400"}`}>
-                            Analyzing
-                          </p>
-                          <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block">Extracting details</p>
-                        </div>
-                      </div>
-
-                      {/* Step 3: Generating */}
-                      <div className={`flex items-center gap-3 sm:gap-4 p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-300 ${
-                        loadingStatus === "generating" ? "bg-cyan-500/10 border border-cyan-500/30" : 
-                        progress >= 100 ? "bg-emerald-500/5 border border-emerald-500/20" : "bg-slate-800/50 border border-slate-700/50"
-                      }`}>
-                        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ${
-                          loadingStatus === "generating" ? "bg-cyan-500" : 
-                          progress >= 100 ? "bg-emerald-500" : "bg-slate-700"
-                        }`}>
-                          {loadingStatus === "generating" ? (
-                            <Loader2 size={14} className="sm:w-[18px] sm:h-[18px] text-white animate-spin" />
-                          ) : progress >= 100 ? (
-                            <CheckCircle2 size={14} className="sm:w-[18px] sm:h-[18px] text-white" />
-                          ) : (
-                            <Sparkles size={14} className="sm:w-[18px] sm:h-[18px] text-slate-400" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-xs sm:text-sm font-medium ${loadingStatus === "generating" ? "text-cyan-300" : progress >= 100 ? "text-emerald-300" : "text-slate-400"}`}>
-                            Generating
-                          </p>
-                          <p className="text-[10px] sm:text-xs text-slate-500 hidden sm:block">AI magic in progress</p>
-                        </div>
-                      </div>
+                  {/* Step Pills - Compact horizontal */}
+                  <div className="flex items-center gap-1.5">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      loadingStatus === "uploading" ? "bg-violet-500 ring-2 ring-violet-500/40" : 
+                      progress >= 40 ? "bg-emerald-500" : "bg-slate-700"
+                    }`}>
+                      {loadingStatus === "uploading" ? <Loader2 size={14} className="text-white animate-spin" /> :
+                       progress >= 40 ? <CheckCircle2 size={14} className="text-white" /> :
+                       <Upload size={14} className="text-slate-400" />}
+                    </div>
+                    <div className={`w-8 h-0.5 rounded-full ${progress >= 40 ? "bg-gradient-to-r from-emerald-500 to-purple-500" : "bg-slate-700"}`} />
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      loadingStatus === "processing" ? "bg-purple-500 ring-2 ring-purple-500/40" : 
+                      progress >= 90 ? "bg-emerald-500" : "bg-slate-700"
+                    }`}>
+                      {loadingStatus === "processing" ? <Loader2 size={14} className="text-white animate-spin" /> :
+                       progress >= 90 ? <CheckCircle2 size={14} className="text-white" /> :
+                       <Shirt size={14} className="text-slate-400" />}
+                    </div>
+                    <div className={`w-8 h-0.5 rounded-full ${progress >= 90 ? "bg-gradient-to-r from-purple-500 to-cyan-500" : "bg-slate-700"}`} />
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      loadingStatus === "generating" ? "bg-cyan-500 ring-2 ring-cyan-500/40" : 
+                      progress >= 100 ? "bg-emerald-500" : "bg-slate-700"
+                    }`}>
+                      {loadingStatus === "generating" ? <Loader2 size={14} className="text-white animate-spin" /> :
+                       progress >= 100 ? <CheckCircle2 size={14} className="text-white" /> :
+                       <Sparkles size={14} className="text-slate-400" />}
                     </div>
                   </div>
                 </div>
